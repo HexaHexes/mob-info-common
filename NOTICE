@@ -1,0 +1,17 @@
+mob-info-common
+Copyright (c) 2026 Bitwise Madness
+
+This mod is licensed under the GNU Lesser General Public License v2.1 - see
+the accompanying LICENSE file.
+
+Third-party mods this project reads through public APIs, and any content
+included from elsewhere, are attributed here. Nothing is included or modified
+without a right to do so.
+
+- Minecraft is a trademark of Mojang AB. This mod is not affiliated with or
+  endorsed by Mojang.
+- NeoForge: https://neoforged.net/
+- Tensura: Reincarnated by ManasMods - variant enums and analysis rules are
+  read through its public API and transcribed recipes, never redistributed.
+- Ice and Fire CE, Mobs of Mythology, and Mysticism - variant identifiers are
+  read through their public enums.

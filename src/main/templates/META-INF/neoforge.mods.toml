@@ -1,0 +1,63 @@
+# Mod metadata file. Values written in dollar-brace form are replaced at build
+# time from gradle.properties (see generateModMetadata in build.gradle), so mod
+# identity is edited in one place only.
+# See https://docs.neoforged.net/docs/concepts/modfiles/ for the full schema.
+
+modLoader = "javafml"
+loaderVersion = "${loader_version_range}"
+license = "${mod_license}"
+
+[[mods]]
+modId = "${mod_id}"
+version = "${mod_version}"
+displayName = "${mod_name}"
+authors = "${mod_authors}"
+description = '''${mod_description}'''
+
+[[dependencies.${mod_id}]]
+modId = "neoforge"
+type = "required"
+versionRange = "[${neo_version},)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "minecraft"
+type = "required"
+versionRange = "${minecraft_version_range}"
+ordering = "NONE"
+side = "BOTH"
+
+# Tensura: optional. The variant enums, and the analysis attributes the gating
+# reads. Every lookup is gated on ModList, so the library loads - and simply
+# resolves no Tensura variants - when Tensura is absent.
+[[dependencies.${mod_id}]]
+modId = "tensura"
+type = "optional"
+ordering = "AFTER"
+side = "BOTH"
+
+# ManasCore: optional (required by Tensura). Present whenever Tensura is; the
+# library reads no ManasCore type directly today, but the module jars are on the
+# compile classpath because Tensura's API carries them.
+[[dependencies.${mod_id}]]
+modId = "manascore"
+type = "optional"
+ordering = "AFTER"
+side = "BOTH"
+
+# Mobs of Mythology: optional. Drake and sporeling variant names.
+[[dependencies.${mod_id}]]
+modId = "mobs_of_mythology"
+type = "optional"
+ordering = "AFTER"
+side = "BOTH"
+
+# Mysticism: optional. Okami variant names. Mysticism depends on Tensura, but
+# that is no reason to assume it is present alongside it, so it gets its own
+# gate rather than borrowing Tensura's.
+[[dependencies.${mod_id}]]
+modId = "mysticism"
+type = "optional"
+ordering = "AFTER"
+side = "BOTH"

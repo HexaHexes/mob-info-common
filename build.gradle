@@ -1,0 +1,255 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'net.neoforged.moddev' version '2.0.148'
+}
+
+version = mod_version
+group = mod_group_id
+
+base {
+    // Keep in sync with rootProject.name in settings.gradle and mod_id in
+    // gradle.properties. The shipped jar is <archivesName>-<version>.jar.
+    archivesName = mod_id
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
+}
+
+// Game tests live in their own source set: they compile against main, and are
+// deliberately NOT part of sourceSets.main - so none of it is packaged into the
+// released jar. Declared before neoForge because the mods block below joins it.
+sourceSets {
+    gametest {
+        compileClasspath += sourceSets.main.output + configurations.compileClasspath
+        runtimeClasspath += output + sourceSets.main.output + configurations.runtimeClasspath
+    }
+}
+
+neoForge {
+    version = project.neo_version
+
+    runs {
+        client {
+            client()
+        }
+
+        server {
+            server()
+            programArgument '--nogui'
+        }
+
+        // Headless test runner. NeoForge's patched server Main boots a
+        // GameTestServer that runs every registered @GameTest and exits - no
+        // window, no live instance. This is the only verification gate.
+        gameTestServer {
+            type = "gameTestServer"
+            gameDirectory = project.layout.projectDirectory.dir('run')
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+            // The gametest source set joins the mod for the dev runs so
+            // @GameTestHolder is discovered from FML's scan data. It is still
+            // not in the jar - the jar only packages sourceSets.main.
+            sourceSet sourceSets.gametest
+        }
+    }
+}
+
+// Expand the ${...} placeholders in src/main/templates into the real
+// neoforge.mods.toml at build time, so mod identity is edited in one place
+// (gradle.properties) rather than duplicated in the toml.
+def generateModMetadata = tasks.register('generateModMetadata', ProcessResources) {
+    def replaceProperties = [
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            neo_version            : neo_version,
+            loader_version_range   : loader_version_range,
+            mod_id                 : mod_id,
+            mod_name               : mod_name,
+            mod_license            : mod_license,
+            mod_version            : mod_version,
+            mod_authors            : mod_authors,
+            mod_description        : mod_description,
+    ]
+    inputs.properties replaceProperties
+    expand replaceProperties
+    from 'src/main/templates'
+    into layout.buildDirectory.dir('generated/sources/modMetadata')
+}
+// Feed the generated metadata in as a resource dir; passing the task provider
+// wires the dependency so the toml is generated before resources are processed.
+sourceSets.main.resources.srcDir generateModMetadata
+neoForge.ideSyncTask generateModMetadata
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+// --- Dependencies ------------------------------------------------------------
+
+// CurseMaven resolves mod jars by CurseForge project + file id. Every mod this
+// library reads is COMPILE-ONLY and optional at runtime: the whole point of the
+// access-class pattern (see agents/REPO.md) is that nothing here loads a foreign
+// type unless the owning mod is actually installed.
+repositories {
+    mavenCentral()
+    maven {
+        name = "CurseMaven"
+        url = uri("https://cursemaven.com")
+        content { includeGroup("curse.maven") }
+    }
+}
+
+// Resolved manascore core artifact; its nested module jars are extracted
+// into build/ for the compile classpath (see extractManascoreModules).
+configurations {
+    // Run-time classpath for dev runs ONLY (runClient / runServer /
+    // runGameTestServer). Not published.
+    localRuntime
+    runtimeClasspath.extendsFrom localRuntime
+    manascoreModules
+}
+
+// Compiled-against view of the extracted manascore module jars; the file
+// collection carries the task dependency, so javac always sees fresh output.
+def manascoreModuleJars = files(fileTree(dir: layout.buildDirectory.dir('manascore-modules').get().asFile, include: '**/*.jar'))
+manascoreModuleJars.builtBy 'extractManascoreModules'
+
+dependencies {
+    // -------------------------------------------------------------------------
+    // Tensura + ManasCore: compile against the real API, but keep them OFF the
+    // published POM and off the required-mod list so the library loads when
+    // Tensura is absent. All Tensura-touching code is isolated behind a ModList
+    // gate at runtime. The pin (2.0.1.3) is the version both consumers ship
+    // against; bump deliberately, never implicitly.
+    // -------------------------------------------------------------------------
+    compileOnly 'curse.maven:tensura-reincarnated-643695:8793360' // tensura-neoforge-2.0.1.3
+    compileOnly 'curse.maven:manascore-619025:8022425' // manascore-neoforge-4.0.0.2
+    // ManasCore's main jar nests its sub-modules under META-INF/jars; the build
+    // extracts them so javac sees the module APIs. Derived from the resolved
+    // Maven artifact - nothing is committed.
+    compileOnly manascoreModuleJars
+
+    manascoreModules 'curse.maven:manascore-619025:8022425'
+
+    // -------------------------------------------------------------------------
+    // Mobs of Mythology + Mysticism: referenced ONLY for the variant names of
+    // their species. Kept off dev runs as well: their entity ids cannot appear
+    // in a live world or stored NBT unless the mods are installed, so there is
+    // nothing for runClient / runGameTestServer to exercise.
+    // -------------------------------------------------------------------------
+    compileOnly 'curse.maven:mobs-of-mythology-699989:8269965' // mobs_of_mythology-3.0.0
+    compileOnly 'curse.maven:mysticism-1148149:8980686' // mysticism-2.2.1
+
+    // Run-time classpath for dev runs ONLY (runClient / runServer /
+    // runGameTestServer). The GameTests exercise the Tensura-backed variant
+    // resolution and the analysis gating, so Tensura must be present in the
+    // dev closure - exactly as it is in the pack these mods ship in.
+    localRuntime 'curse.maven:tensura-reincarnated-643695:8793360'
+    localRuntime 'curse.maven:manascore-619025:8022425'
+    // Tensura's own required libraries (only needed for dev runs).
+    localRuntime 'curse.maven:architectury-api-419699:5786327'
+    localRuntime 'curse.maven:geckolib-388172:8309311'
+    localRuntime 'curse.maven:smartbrainlib-661293:7055149'
+    localRuntime 'curse.maven:terrablender-neoforge-940057:6054947'
+}
+
+// Extract manascore's nested module jars - byte-identical to the libs/ copies
+// once used here - into build/ so javac sees the module APIs. Derived entirely
+// from the resolved Maven artifact.
+tasks.register('extractManascoreModules', Sync) {
+    from { zipTree(configurations.manascoreModules.singleFile) }
+    include 'META-INF/jars/*.jar'
+    into layout.buildDirectory.dir('manascore-modules')
+}
+
+// --- JUnit suite -------------------------------------------------------------
+
+// The CI junit check grades the suite and refuses to pass on an empty run, so
+// this configuration must stay wired in every derived repo. Keep the suites
+// free of Minecraft classes: the test source set is not given the NeoForge
+// artifact, so only pure logic is testable here.
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.2')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+// --- GameTest harness -------------------------------------------------------
+
+// Grade the run on the log summary, not the exit code: the GameTestServer prints
+// "All N required tests passed :)" when every required test succeeds. Keep
+// expectedTests in sync with the @GameTest methods in src/gametest.
+tasks.matching { it.name == 'runGameTestServer' }.configureEach {
+    def expectedTests = 5
+    doLast {
+        def log = file('run/logs/latest.log')
+        if (!log.exists()) {
+            throw new GradleException("GameTest produced no log at ${log}")
+        }
+        def text = log.text
+        def problems = []
+        def passMatcher = (text =~ /All (\d+) required tests passed/)
+        if (passMatcher.find()) {
+            def passed = passMatcher.group(1) as int
+            if (passed != expectedTests) {
+                problems << "only ${passed}/${expectedTests} tests passed"
+            }
+        } else if ((text =~ /\d+ required tests failed/).find()) {
+            problems << 'GameTest reported failed tests'
+        } else {
+            problems << 'no GameTest summary found in log'
+        }
+        if (text.contains('Encountered an unexpected exception')) {
+            problems << 'server crashed during tests'
+        }
+        if (problems) {
+            throw new GradleException("GameTest failed: ${problems.join('; ')} - see ${log}")
+        }
+        logger.lifecycle("GameTest OK: all ${expectedTests} tests passed")
+    }
+}
+
+// --- Publishing -------------------------------------------------------------
+
+// The library publishes to the org's GitHub Packages Maven registry so every
+// consumer resolves it from Maven instead of a local jar (see agents/AGENTS.md).
+// Credentials come from the workflow token in CI; a local publish can supply
+// gpr.user / gpr.key in ~/.gradle/gradle.properties. Keep the URL pointing at
+// THIS repository - the rename checklist in README.md covers it.
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            from components.java
+            artifactId = mod_id
+            pom {
+                name = mod_name
+                description = mod_description
+                licenses {
+                    license {
+                        name = mod_license
+                    }
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = 'GitHubPackages'
+            url = uri('https://maven.pkg.github.com/HexaHexes/mob-info-common')
+            credentials {
+                username = System.getenv('GITHUB_ACTOR') ?: project.findProperty('gpr.user')
+                password = System.getenv('GITHUB_TOKEN') ?: project.findProperty('gpr.key')
+            }
+        }
+    }
+}
