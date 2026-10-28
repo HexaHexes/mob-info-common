@@ -25,6 +25,7 @@ on:
 
 permissions:
   contents: write
+  packages: write
 
 concurrency:
   group: release
@@ -112,3 +113,15 @@ jobs:
             --title "v$VERSION" \
             --notes "$NOTES" \
             $PRERELEASE
+
+      # A release created with the workflow's own token deliberately does NOT
+      # trigger publish.yml - GitHub suppresses workflow chains from the
+      # default GITHUB_TOKEN to prevent recursion - so the Maven upload runs
+      # here, inside the same release run. publish.yml keeps its
+      # workflow_dispatch for republishing a version after a packaging fix.
+      - name: Publish to GitHub Packages
+        if: steps.resolve.outputs.skip == 'false'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_ACTOR: ${{ github.actor }}
+        run: ./gradlew publish --no-daemon --stacktrace

@@ -62,5 +62,8 @@ classes - the test source set carries no NeoForge artifact.
 - `ci.yml` runs the template's three checks (junit, gametest, version-bump).
 - `release.yml` + `publish.yml`: a push to `main` cuts the GitHub release for
   the current `mod_version` (pre-releases gated by the `ALPHA_RELEASES`
-  repository variable), and publishing that release uploads the Maven artifact
-  consumers resolve.
+  repository variable) **and publishes the Maven artifact in the same run** -
+  a release created with the workflow's own token does not trigger
+  `publish.yml` (GitHub suppresses that chain), so the upload lives in
+  `release.yml`. `publish.yml`'s `workflow_dispatch` remains the way to
+  republish a version after a packaging fix.
