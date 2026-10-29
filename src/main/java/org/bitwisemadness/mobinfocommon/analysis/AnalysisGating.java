@@ -1,12 +1,11 @@
 package org.bitwisemadness.mobinfocommon.analysis;
 
+import java.text.DecimalFormat;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.fml.ModList;
 import org.bitwisemadness.mobinfocommon.MobInfoCommon;
-
-import java.text.DecimalFormat;
 
 /**
  * Tensura's analysis gating, shared by every addon that shows information the

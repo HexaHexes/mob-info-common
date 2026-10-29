@@ -1,9 +1,8 @@
 package org.bitwisemadness.mobinfocommon.variant;
 
+import java.util.Optional;
 import net.pixeldreamstudios.mobs_of_mythology.entity.variant.DrakeVariant;
 import net.pixeldreamstudios.mobs_of_mythology.entity.variant.SporelingVariant;
-
-import java.util.Optional;
 
 /**
  * The only class in this library that imports a Mobs of Mythology type.
