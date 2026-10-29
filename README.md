@@ -1,8 +1,7 @@
 # Mob Info Common
 
 The shared mob-information library behind **Pseudocore** and **Tensura Jade**.
-It has no gameplay of its own: on its own, it changes nothing you can see in
-game. Both addons read the same logic from it.
+On its own it adds nothing you can see in game.
 
 ## What it provides
 
