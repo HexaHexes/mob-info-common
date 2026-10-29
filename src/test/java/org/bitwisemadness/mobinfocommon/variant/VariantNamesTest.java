@@ -1,11 +1,10 @@
 package org.bitwisemadness.mobinfocommon.variant;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Optional;
 import java.util.function.IntFunction;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 
 /**
  * The bounds handling that lives in exactly one place, because each enum's

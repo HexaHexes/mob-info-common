@@ -1,11 +1,10 @@
 package org.bitwisemadness.mobinfocommon.variant;
 
-import net.neoforged.fml.ModList;
-import org.bitwisemadness.mobinfocommon.MobInfoCommon;
-
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
+import net.neoforged.fml.ModList;
+import org.bitwisemadness.mobinfocommon.MobInfoCommon;
 
 /**
  * Facade for every int-ordinal variant the pack's mods use.
