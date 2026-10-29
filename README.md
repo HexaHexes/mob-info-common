@@ -1,8 +1,8 @@
 # Mob Info Common
 
 The shared mob-information library behind **Pseudocore** and **Tensura Jade**.
-It has no gameplay of its own: installed alone, it changes nothing you can see
-in game. The pack installs it once, and both addons read the same logic.
+It has no gameplay of its own: on its own, it changes nothing you can see in
+game. Both addons read the same logic from it.
 
 ## What it provides
 
@@ -55,7 +55,7 @@ dependencies {
 Reads on GitHub Packages always require authentication. In CI the token needs
 `packages: read`; the workflow token of one repository cannot read a package
 owned by another, so a read token is supplied as a secret. A pack that ships
-Pseudocore or Tensura Jade needs this library installed alongside them.
+Pseudocore or Tensura Jade needs this library too.
 
 Publication happens when a GitHub release is published: the `Publish` workflow
 builds and uploads the artifact under the version in `gradle.properties`.
