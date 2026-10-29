@@ -1,25 +1,24 @@
 # Mob Info Common
 
 The shared mob-information library behind **Pseudocore** and **Tensura Jade**.
-It ships no gameplay of its own: installing it alone changes nothing you can
-see in game. The pack installs it once, and both addons read the same logic.
+It has no gameplay of its own: installed alone, it changes nothing you can see
+in game. The pack installs it once, and both addons read the same logic.
 
 ## What it provides
 
-- **Variant-qualified mob names** - the logic that turns a mob's stored
-  variant into readable words, so a captured direwolf reads *Red Fang
-  Direwolf* and a dragon *Emerald Fire Dragon*. Covers Tensura, Ice and Fire,
-  Mobs of Mythology and Mysticism, and degrades to the plain species name when
-  a variant cannot be read - including for mobs whose mod was removed after
-  they were captured.
-- **Analysis gating** - the same rules Tensura's own analysis overlay uses:
-  who may see analysed information, and how high EP figures blur beyond the
-  reader's grasp. Both addons gate with these rules so neither becomes a way
-  around Tensura's balance.
+- **Variant-qualified names**. The library turns a mob's stored variant into
+  readable words, so a captured direwolf reads *Red Fang Direwolf* and a dragon
+  *Emerald Fire Dragon*. It covers Tensura, Ice and Fire, Mobs of Mythology and
+  Mysticism, and falls back to the plain species name when a variant cannot be
+  read, including for mobs whose mod was removed after they were captured.
+- Analysis gating. The library applies the same rules Tensura's own analysis
+  overlay uses: who may see analysed information, and how high EP figures blur
+  beyond the reader's grasp. Both addons gate with these rules, so neither
+  becomes a way around Tensura's balance.
 
-Every mod the library reads is optional at runtime. Without them it simply
-resolves nothing, and the addons that depend on it keep working with the
-features those mods would have fed.
+Every mod the library reads is optional at runtime. Without them it resolves
+nothing, and the addons that depend on it keep working without the features
+those mods would have fed.
 
 ## Dependencies
 
