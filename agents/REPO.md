@@ -6,8 +6,8 @@ and pulled in verbatim - **never hand-edit it.** Everything in this file is this
 repo's own and is edited freely; keep it aligned with the org rules rather than
 restating them.
 
-**Repo:** `HexaHexes/mob-info-common` · **Mod ID:** `mob_info_common` · **Branch:** `main`
-**Platform:** Minecraft 1.21.1 / NeoForge 21.1.259 / JDK 21 · **Gradle:** wrapper committed
+**Repo:** `HexaHexes/mob-info-common` · **Mod ID:** `mob_info_common` · **Branch:** `neoforge-1.21.1` (the loader line; this is the default branch - no `main`)
+**Platform:** Minecraft 1.21.1 / NeoForge 21.1.259 / JDK 21 · **Jar:** `build/libs/mob_info_common-neoforge-1.21.1-<version>.jar` · **Gradle:** wrapper committed
 **Jar:** `build/libs/mob_info_common-<version>.jar`
 
 Shared mob-information logic for the Bitwise Madness Tensura addons:
